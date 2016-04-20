@@ -45,14 +45,29 @@ var App = React.createClass({
     });
   },
 
+  renderFish: function(key){
+
+  	return <Fish key={key} index = {key} details={this.state.fishes[key]}/>
+
+  },
+
+
 	render: function() {
 
+		//loop over every fish in the object
 		return(
 
 		<div className="catch-of-the-day">
 			
 			<div className = "menu">
 				<Header tagline="A test app"/>
+
+				<ul ClassName="list-of-fishes">
+
+				  {Object.keys(this.state.fishes).map(this.renderFish)}
+
+				</ul>
+
 			</div>
 				<Order/>
 				<Inventory addFish = {this.addFish} loadSamples = {this.loadSamples}/>
@@ -64,6 +79,48 @@ var App = React.createClass({
 	}
 
 });
+
+//Fish <Fish>
+
+var Fish = React.createClass({
+
+	onButtonClick : function(){
+
+		console.log("going to add fish", this.props.index);
+
+	},
+
+	render: function(){
+
+		var details = this.props.details;
+
+		//check if fish is avaliable
+
+		var isAvaliable = (details.status === 'avaliable' ? true: false);
+
+		//if is avaliable, set the button text to be "add to order" otherwise set the button text to sold out
+
+		//if not avaliable - disable the button 
+		var buttonText = (isAvaliable ? 'Add to Order' : 'Sold Out');
+
+		return (
+
+			<li className = "menu-fish">
+				<img src={details.image} alt={details.name}/>
+
+				<h3 className="fish-name">{details.name}
+					<span className="price">{helpers.formatPrice(details.price)}
+					</span>
+				</h3>
+				<p>{details.desc}</p>
+
+
+				<button disabled={!isAvaliable} onClick={this.onButtonClick}>{buttonText}</button>
+
+			</li>	
+		)
+	}
+})
 
 //create a form to add a fish which can be accessed from anywhere
 //<addFishForm>
