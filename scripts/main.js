@@ -8,8 +8,38 @@ var Router = ReactRouter.Router;
 var Route = ReactRouter.Route;
 var Navigation = ReactRouter.Navigation;
 var createBrowserHistory = require('history/lib/createBrowserHistory');
+var History = ReactRouter.History;
+
+var helpers = require('./helpers');
 
 var App = React.createClass({
+
+    //before it creates the component, populate with anything that is in these fields
+    
+	getInitialState : function(){
+
+		return {	
+			fishes: {},
+			order :{}
+		}
+
+	},
+    
+    //method to add a fish to the state 
+    //give all fishes a unique key
+    addFish : function(fish){
+
+    	var timestamp = (new Date()).getTime();
+
+    	//update the state object and use the timestamp as unique ID
+
+    	this.state.fishes['fish-' + timestamp] = fish;
+
+    	//set the state
+
+    	this.setState({fishes : this.state.fishes});
+
+    },
 
 	render: function() {
 
@@ -18,10 +48,10 @@ var App = React.createClass({
 		<div className="catch-of-the-day">
 			
 			<div className = "menu">
-				<Header tagline="A demo Seafood Market App"/>
+				<Header tagline="A test app"/>
 			</div>
 				<Order/>
-				<Inventory/>
+				<Inventory addFish = {this.addFish}/>
 
 
 		</div>
@@ -30,6 +60,67 @@ var App = React.createClass({
 	}
 
 });
+
+//create a form to add a fish which can be accessed from anywhere
+//<addFishForm>
+
+var AddFishForm = React.createClass({
+
+	createFish : function(event){
+
+		//1. Stop the form from submitting
+
+		event.preventDefault();
+
+		//2.Take the data from the form and create an object
+
+		var fish = {
+
+			name: this.refs.name.value,
+			price: this.refs.price.value,
+			status: this.refs.status.value,
+			desc: this.refs.desc.value,
+			image: this.refs.image.value
+		}
+
+		//3.Add the fish to the app state.
+
+		this.props.addFish(fish);
+
+		//reset the form after submit
+
+		this.refs.fishForm.reset();
+
+		console.log(fish);
+	},
+
+	render: function(){
+
+		return (
+
+		<form className = "fish-edit" ref="fishForm" onSubmit={this.createFish}>
+
+			<input type="text" ref="name" placeholder = "Fish Name" />
+			<input type="text" ref="price" placeholder = "Fish Price" />
+
+			<select ref="status">
+			 <option value = "avaliable">Fresh</option>
+			 <option value = "sold out">Sold Out</option>
+			</select>
+
+			<textarea type="text" ref="desc" placeholder = "Description"></textarea>
+
+			<input type="text" ref="image" placeholder = "URL to Image" />
+
+			<button type = "Submit" > + Add Item </button>
+		
+		</form>
+
+		)
+		
+	}
+});
+
 
 //header component
 
@@ -67,8 +158,11 @@ var Inventory = React.createClass({
 
 		return(
 
-			<p>Inventory</p>
+			<div>
+				<h2>Inventory</h2>
 
+				<AddFishForm {...this.props}/>
+			</div>
 		)
 	}
 });
@@ -92,13 +186,35 @@ var Order = React.createClass({
 
 var StorePicker = React.createClass({
 
+//populate storepicker with a push state on the url
+
+mixins : [History],	
+
+goToStore : function(event){
+
+	event.preventDefault();
+	//console.log('Submited the form');
+
+	//get the data from the input - go from <storepicker/> to <app/>
+	//reference the input anywhere inside of the component
+
+	var storeID = this.refs.storeID.value;
+
+    //change the URL without having to use hashes. Page does not need to be refreshed.
+
+	this.history.pushState(null, '/store/' + storeID);
+
+	//console.log(storeID);
+
+
+},
 
 //rendering HTML
 	render : function(){
 		return(
-			<form className="store-selector">
+			<form className="store-selector" onSubmit={this.goToStore}>
 				<h2>Please enter a store </h2>
-				<input type ="text" ref="storeID" required/>
+				<input type ="text" ref="storeID" defaultValue = {helpers.getFunName()} required/>
 				<input type = "Submit"/> 
 			</form>
 		)
