@@ -16,14 +16,12 @@ var App = React.createClass({
 
     //before it creates the component, populate with anything that is in these fields
     
-	getInitialState : function(){
-
-		return {	
-			fishes: {},
-			order :{}
-		}
-
-	},
+  getInitialState : function() {
+    return {
+      fishes : {},
+      order : {}
+    }
+  }, 
     
     //method to add a fish to the state 
     //give all fishes a unique key
@@ -41,6 +39,12 @@ var App = React.createClass({
 
     },
 
+  loadSamples : function() {
+    this.setState({
+      fishes : require('./sample-fishes')
+    });
+  },
+
 	render: function() {
 
 		return(
@@ -51,7 +55,7 @@ var App = React.createClass({
 				<Header tagline="A test app"/>
 			</div>
 				<Order/>
-				<Inventory addFish = {this.addFish}/>
+				<Inventory addFish = {this.addFish} loadSamples = {this.loadSamples}/>
 
 
 		</div>
@@ -162,6 +166,8 @@ var Inventory = React.createClass({
 				<h2>Inventory</h2>
 
 				<AddFishForm {...this.props}/>
+				<button onClick={this.props.loadSamples}>Load Sample Fishes</button>
+
 			</div>
 		)
 	}
