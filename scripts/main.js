@@ -2,9 +2,12 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 var ReactRouter = require('react-router');
 
+
+//load in the React Router
 var Router = ReactRouter.Router;
 var Route = ReactRouter.Route;
 var Navigation = ReactRouter.Navigation;
+var CreateBrowserHistory = require('history/lib/CreateBrowserHistory');
 
 var App = React.createClass({
 
@@ -103,9 +106,19 @@ var StorePicker = React.createClass({
 
 });
 
+//routing for components
+//pass in the history for the routing
+var routes = (
+
+	<Router history = {CreateBrowserHistory}>
+		<Route path = "/" component={StorePicker}/>
+		<Route path = "/store/:storeId" component={App}/>
+	</Router>
+	)
+
 //mount it to the page on page load and put in in the main div
 
-ReactDOM.render(<App/>, document.querySelector('#main') );
+ReactDOM.render(routes, document.querySelector('#main') );
 
 
 
