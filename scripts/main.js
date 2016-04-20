@@ -7,7 +7,7 @@ var ReactRouter = require('react-router');
 var Router = ReactRouter.Router;
 var Route = ReactRouter.Route;
 var Navigation = ReactRouter.Navigation;
-var CreateBrowserHistory = require('history/lib/CreateBrowserHistory');
+var createBrowserHistory = require('history/lib/createBrowserHistory');
 
 var App = React.createClass({
 
@@ -19,7 +19,7 @@ var App = React.createClass({
 			
 			<div className = "menu">
 				<Header tagline="A demo Seafood Market App"/>
-				</div>
+			</div>
 				<Order/>
 				<Inventory/>
 
@@ -106,15 +106,26 @@ var StorePicker = React.createClass({
 
 });
 
+//not found component
+
+var NotFound = React.createClass({
+
+	render: function(){
+
+		return <h1> 404 - Sorry, These are not the droids you are looking for!
+		(Page doesn't exist)</h1>
+	}
+});
+
 //routing for components
 //pass in the history for the routing
 var routes = (
-
-	<Router history = {CreateBrowserHistory}>
-		<Route path = "/" component={StorePicker}/>
-		<Route path = "/store/:storeId" component={App}/>
-	</Router>
-	)
+  <Router history={createBrowserHistory()}>
+    <Route path="/" component={StorePicker}/>
+    <Route path="/store/:storeId" component={App}/>
+    <Route path="*" component={NotFound}/>
+  </Router>
+)
 
 //mount it to the page on page load and put in in the main div
 
