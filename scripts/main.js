@@ -12,6 +12,12 @@ var History = ReactRouter.History;
 
 var helpers = require('./helpers');
 
+//firebase
+var Rebase = require('re-base');
+var base = Rebase.createClass('https://lauriedemoapp1.firebaseio.com');
+
+
+
 var App = React.createClass({
 
     //before it creates the component, populate with anything that is in these fields
@@ -22,9 +28,31 @@ var App = React.createClass({
       order : {}
     }
   }, 
+
+  componentDidMount : function() {
+    base.syncState(this.props.params.storeId + '/fishes', {
+      context : this,
+      state : 'fishes'
+    });
+
+  },
+
+
+  addToOrder: function(key){
+
+  	//add one to the order state otherwise it is just 1
+
+  	this.state.order[key] = this.state.order[key]+1 || 1;
+
+  	//update the state of the order
+
+  	this.setState({order: this.state.order});
+
+  },
+
     
-    //method to add a fish to the state 
-    //give all fishes a unique key
+   //method to add a fish to the state 
+   //give all fishes a unique key
     addFish : function(fish){
 
     	var timestamp = (new Date()).getTime();
@@ -47,7 +75,7 @@ var App = React.createClass({
 
   renderFish: function(key){
 
-  	return <Fish key={key} index = {key} details={this.state.fishes[key]}/>
+  	return <Fish key={key} index = {key} details={this.state.fishes[key]} addToOrder={this.addToOrder}/>
 
   },
 
@@ -69,7 +97,7 @@ var App = React.createClass({
 				</ul>
 
 			</div>
-				<Order/>
+				<Order fishes={this.state.fishes} order={this.state.order}/>
 				<Inventory addFish = {this.addFish} loadSamples = {this.loadSamples}/>
 
 
@@ -80,13 +108,17 @@ var App = React.createClass({
 
 });
 
-//Fish <Fish>
+//Fish <Fish/>
 
 var Fish = React.createClass({
 
 	onButtonClick : function(){
 
 		console.log("going to add fish", this.props.index);
+
+		var key= this.props.index;
+
+		this.props.addToOrder(key);
 
 	},
 
@@ -96,7 +128,7 @@ var Fish = React.createClass({
 
 		//check if fish is avaliable
 
-		var isAvaliable = (details.status === 'avaliable' ? true: false);
+		var isAvaliable = (details.status === 'available' ? true: false);
 
 		//if is avaliable, set the button text to be "add to order" otherwise set the button text to sold out
 
@@ -233,12 +265,58 @@ var Inventory = React.createClass({
 //Order component
 
 var Order = React.createClass({
+  renderOrder : function(key) {
+    var fish = this.props.fishes[key];
+    var count = this.props.order[key];
+ 
+    if(!fish) {
+      return <li key={key}>Sorry, fish no longer available!</li>
+    }
+ 
+    return (
+      <li>
+        {count}Kgs 
+        {fish.name}
+        <span className="price">{helpers.formatPrice(count * fish.price)}</span>
+      </li>)
+  },
 
-	render : function(){
+	render : function() {
+ 
+ 
+    var orderIds = Object.keys(this.props.order);
+    
+    var total = orderIds.reduce((prevTotal, key)=> {
+ 
+      var fish = this.props.fishes[key];
+ 
+      var count = this.props.order[key];
+ 
+      var isAvailable = fish && fish.status === 'available';
+ 
+      if(fish && isAvailable) {
+ 
+        return prevTotal + (count * parseInt(fish.price) || 0);
+      }
+ 
+      return prevTotal;
+    }, 0);
+
+
 
 		return(
 
-			<p>Order</p>
+			<div className="order-wrap">
+				<h2 className="order-title">Your Order</h2>
+
+					<ul className="order">
+					{orderIds.map(this.renderOrder)}
+						<li ClassName="total">
+						<strong>Total:</strong>
+						{helpers.formatPrice(total)}
+						</li>
+					</ul>
+			</div>
 
 		)
 	}
